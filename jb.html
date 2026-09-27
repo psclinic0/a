@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en" manifest="cache.appcache">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PSCLINIC</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: #0b0d10;
+        color: #c8ced8;
+        font: 15px/1.45 "Segoe UI", system-ui, sans-serif;
+      }
+      #brand {
+        text-align: center;
+        padding: 8px 10px;
+        background: #0e1116;
+        border-bottom: 1px solid #1e2732;
+      }
+      #brand img {
+        width: 28px;
+        height: 28px;
+        margin-right: 8px;
+        border-radius: 50%;
+        vertical-align: middle;
+      }
+      #brand b {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        color: #e6ebf2;
+        vertical-align: middle;
+      }
+
+      /* running: a spinner under the brand. jb.js sets body.done / body.fail / body.log. */
+      #spin {
+        position: fixed;
+        top: calc(50% + 20px);
+        left: 50%;
+        width: 46px;
+        height: 46px;
+        margin: -23px 0 0 -23px;
+        border: 4px solid #1e2732;
+        border-top-color: #7fd0a0;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #msg {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        right: 0;
+        transform: translateY(-50%);
+        text-align: center;
+        font-size: 16px;
+        letter-spacing: 0.5px;
+        display: none;
+      }
+      #wrap {
+        padding: 0;
+      }
+      #state,
+      #out {
+        display: none;
+      }
+
+      body.done #spin {
+        display: none;
+      }
+      body.fail #spin {
+        display: none;
+      }
+      body.fail #msg {
+        display: block;
+      }
+
+      /* ?log=1 -- the full step log, styled like the landing. */
+      body.log #spin,
+      body.log #msg {
+        display: none;
+      }
+      body.log #wrap {
+        padding: 14px 18px;
+      }
+      body.log #state {
+        display: block;
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+      body.log #out {
+        display: block;
+        white-space: pre-wrap;
+        font: 12px/1.45 Consolas, monospace;
+        background: #11151b;
+        border: 1px solid #1e2732;
+        border-radius: 5px;
+        padding: 10px 12px;
+        height: calc(100vh - 141px);
+        overflow-y: auto;
+      }
+      .ok {
+        color: #7fd0a0;
+      }
+      .bad {
+        color: #d08a7f;
+      }
+      .warn {
+        color: #d8c07f;
+      }
+      .safe {
+        color: #7fd0a0;
+      }
+      .danger {
+        color: #d08a7f;
+      }
+      code {
+        color: #9fb3d0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="brand">
+      <img
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAA3tUlEQVR42t29d5xV5bn3/b3v1XaZmT3MDG2Gjoo0KQJSREHAEvuJYowxia9503NSjq9PmtEkGp9TzJNzTo6aclLURANJNBELIgIqVRAQkI44Q2f67LLqfb9/7L3HYZiBQUly8uzPZ39mZs1ea691XffVfle5BX/Dl9ZaAhKIhBC6eFwIgVJqYBiGI48cOTI6Foudb9v2kCiKqtva2ipbWlpKwjCMKaVMIQSGYYSGYbi+76czmUxDNps95Pv+/ubm5h1tbW3bGhsbt99zzz11nb5bLF++3Fi+fLn67ne/q/5WNBB/A6KLAtG1EEJ1OD44l8tN9zzv0kwmMymKonOAVBAEKKUIwxClFFEUEYYhWut2ZhWYgGVZaK2JogjDMHBdl+bmZlpbW1uy2eyeXC63PpvNrjh69OiqBx544N2OC2HhwoVi/vz5CtD/VzKguOJmz54ddjg2vKGh4dpMJnOD67pTDMOIh2GI67q4rksURdo0TVUgshBCIKUUUkpRJHyREVprtNZaCKELxzRAFEVSSim01iilyGQyNDY25lzXXed53jPHjx9/9u67795bvKd7773XvO+++06QyL93BgittRRCRAVCWYcOHbo6nU7f4bruPNu247lcjlwuh5qysm1bG4YhbdsWhmG0E7r4Lq76ItE7MbkjM9rfSimtlNKAiqJIKKUMAN/3OX78eM513SXZbPaX//7v//7chg0bgsI1jIKE6r9bBixYsMCYP39+BHD06RegShoaGj3ue9zkhxBilFK7rYllW6DiOsCxLmqYppJRdEvsMJK2nDFFKKR1FkQmQyWRobm7emk6nH1m+fPljDz/8cLrzM/zdMEBrLRYuXCjnz58fbd261Q7D8E7Xdf/JcZzhBZ2uEomEtm1bWpYlpJSnJXZ3/+t8vLnUnIoRRWZEUaTCMBRCCBmGIfX19Xuz2exD3/jGN/777bff9hcsWGDcfPPN6i+hlsRfgPhGUd2sWrXqWiHE92zbHh8EAYZhRMlkUti2LQ3DoImv43mfd+aOK4WpGKY4bH1dJj6nkyZqj7xW2tQc49B5Q0a3fK30e36L4UjV2Wv+K1T86c2P7wD2s5mK0nFfK4AAAABJRU5ErkJggg=="
+        alt=""
+        width="28"
+        height="28"
+      /><b>PSCLINIC</b>
+    </div>
+    <div id="spin"></div>
+    <div id="msg">Restart your console</div>
+    <div id="wrap">
+      <div id="state"></div>
+      <div id="out"></div>
+    </div>
+    <script type="module">
+      import "./jb.js?v=10";
+    </script>
+  </body>
+</html>
+```[cite: 8]
